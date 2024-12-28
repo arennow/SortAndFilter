@@ -61,17 +61,15 @@ public func && <T>(_ a: @escaping Filter.Predicate<T>, _ b: @escaping Filter.Pre
 public prefix func ! <T>(_ p: @escaping Filter.Predicate<T>) -> Filter.Predicate<T> { Filter.not(p) }
 
 #if canImport(Foundation)
+	import Foundation
 
-import Foundation
+	public extension Filter {
+		static func contains<T>(_ kp: KeyPath<T, some StringProtocol>, _ fragment: some StringProtocol) -> Predicate<T> {
+			{ $0[keyPath: kp].localizedCaseInsensitiveContains(fragment) }
+		}
 
-public extension Filter {
-	static func contains<T>(_ kp: KeyPath<T, some StringProtocol>, _ fragment: some StringProtocol) -> Predicate<T> {
-		{ $0[keyPath: kp].localizedCaseInsensitiveContains(fragment) }
+		static func contains<T>(_ kp: KeyPath<T, Optional<some StringProtocol>>, _ fragment: some StringProtocol) -> Predicate<T> {
+			{ $0[keyPath: kp]?.localizedCaseInsensitiveContains(fragment) ?? false }
+		}
 	}
-
-	static func contains<T>(_ kp: KeyPath<T, Optional<some StringProtocol>>, _ fragment: some StringProtocol) -> Predicate<T> {
-		{ $0[keyPath: kp]?.localizedCaseInsensitiveContains(fragment) ?? false }
-	}
-}
-
 #endif
