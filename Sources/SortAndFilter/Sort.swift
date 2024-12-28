@@ -27,9 +27,28 @@ public enum Sort {
 		}
 	}
 
+	public static func asc<V>(_ extractor: @escaping (V) -> Bool) -> Comparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (false, true): return true
+				default: return false
+			}
+		}
+	}
+
 	public static func desc<V>(_ extractor: @escaping (V) -> some Comparable) -> Comparator<V> {
 		{ extractor($0) > extractor($1) }
 	}
+	
+	public static func desc<V>(_ extractor: @escaping (V) -> Bool) -> Comparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (true, false): return true
+				default: return false
+			}
+		}
+	}
+
 }
 
 public enum Extractor {
