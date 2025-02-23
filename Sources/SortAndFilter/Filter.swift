@@ -1,8 +1,8 @@
-public enum Filter {}
+public enum Filter {
+	public typealias Predicate<T> = (T) -> Bool
+}
 
 public extension Filter {
-	typealias Predicate<T> = (T) -> Bool
-
 	static func equal<T, V: Equatable>(_ kp: KeyPath<T, V>, _ value: V) -> Predicate<T> {
 		{ $0[keyPath: kp] == value }
 	}
@@ -13,6 +13,24 @@ public extension Filter {
 
 	static func notEqual<T, V: Equatable>(_ kp: KeyPath<T, V>, _ value: V) -> Predicate<T> {
 		{ $0[keyPath: kp] != value }
+	}
+}
+
+public extension Filter {
+	static func greaterThan<T, V: Comparable>(_ kp: KeyPath<T, V>, _ value: V) -> Predicate<T> {
+		{ $0[keyPath: kp] > value }
+	}
+
+	static func greaterThanOrEqual<T, V: Comparable>(_ kp: KeyPath<T, V>, _ value: V) -> Predicate<T> {
+		{ $0[keyPath: kp] >= value }
+	}
+
+	static func lessThan<T, V: Comparable>(_ kp: KeyPath<T, V>, _ value: V) -> Predicate<T> {
+		{ $0[keyPath: kp] < value }
+	}
+
+	static func lessThanOrEqual<T, V: Comparable>(_ kp: KeyPath<T, V>, _ value: V) -> Predicate<T> {
+		{ $0[keyPath: kp] <= value }
 	}
 }
 
