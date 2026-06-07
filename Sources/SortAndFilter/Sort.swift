@@ -40,6 +40,17 @@ public enum Sort {
 		{ extractor($0) > extractor($1) }
 	}
 
+	public static func desc<V>(_ extractor: @escaping (V) -> Optional<some Comparable>) -> Comparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (let .some(l), .some(let r)): return l > r
+				case (.none, .some): return false
+				case (.some, .none): return true
+				case (.none, .none): return false
+			}
+		}
+	}
+
 	public static func desc<V>(_ extractor: @escaping (V) -> Bool) -> Comparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
