@@ -56,12 +56,26 @@ struct SortTests {
 	}
 
 	@Test
+	func ascOptionalBool() {
+		let sorted = TestConstants.people.sorted(by: Sort.asc(\.isVerified))
+		// false before true, nils last
+		#expect(sorted.map(\.isVerified) == [false, true, true, nil, nil])
+	}
+
+	@Test
+	func descOptionalBool() {
+		let sorted = TestConstants.people.sorted(by: Sort.desc(\.isVerified))
+		// true before false, nils last
+		#expect(sorted.map(\.isVerified) == [true, true, false, nil, nil])
+	}
+
+	@Test
 	func memoize() {
 		var callCount = 0
-		let memoized = Extractor.memoize({ (n: Int) -> Int in
+		let memoized = Extractor.memoize { (n: Int) -> Int in
 			callCount += 1
 			return n * 2
-		})
+		}
 
 		#expect(memoized(3) == 6)
 		#expect(memoized(3) == 6)

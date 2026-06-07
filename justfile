@@ -6,3 +6,6 @@ report_errors:
 
 _impl_format *ARGS:
 	swiftformat {{ARGS}} .
+
+test *ARGS:
+	swift test {{ARGS}}
