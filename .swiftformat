@@ -10,6 +10,9 @@
 --stripunusedargs closure-only
 --ranges no-space
 --wraparguments after-first
+--wrapconditions after-first
+--guardelse next-line
+--allow-partial-wrapping false
 --wrapcollections before-first
 --disable typeSugar
 --disable redundantParens
@@ -20,6 +23,8 @@
 --disable redundantStaticSelf
 --disable wrapPropertyBodies
 --disable wrapFunctionBodies
+--disable wrapIfStatementBodies
+--disable wrapIfExpressionBodies
 --disable docComments
 --disable swiftTestingTestCaseNames
 --enable acronyms
