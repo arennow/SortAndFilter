@@ -10,6 +10,57 @@ import Testing
 
 struct FilterTests {
 	@Test
+	func ordinaryBuilders() {
+		typealias Person = TestConstants.Person
+		let equal: (KeyPath<Person, Int>, Int) -> Filter.Predicate<Person> = Filter.equal
+		let optionalEqual: (KeyPath<Person, Int>, Int?) -> Filter.Predicate<Person> = Filter.equal
+		let notEqual: (KeyPath<Person, Int>, Int) -> Filter.Predicate<Person> = Filter.notEqual
+		let greater: (KeyPath<Person, Int>, Int) -> Filter.Predicate<Person> = Filter.greaterThan
+		let greaterOrEqual: (KeyPath<Person, Int>, Int) -> Filter.Predicate<Person> = Filter.greaterThanOrEqual
+		let less: (KeyPath<Person, Int>, Int) -> Filter.Predicate<Person> = Filter.lessThan
+		let lessOrEqual: (KeyPath<Person, Int>, Int) -> Filter.Predicate<Person> = Filter.lessThanOrEqual
+		let isTrue: (KeyPath<Person, Bool>) -> Filter.Predicate<Person> = Filter.isTrue
+		let isFalse: (KeyPath<Person, Bool>) -> Filter.Predicate<Person> = Filter.isFalse
+		let isNil: (KeyPath<Person, Int?>) -> Filter.Predicate<Person> = Filter.isNil
+		let contains: (KeyPath<Person, String>, String) -> Filter.Predicate<Person> = Filter.contains
+		let optionalContains: (KeyPath<Person, String?>, String) -> Filter.Predicate<Person> = Filter.contains
+		let jeff = TestConstants.people[0]
+		#expect(equal(\.age, 24)(jeff))
+		#expect(optionalEqual(\.age, 24)(jeff))
+		#expect(notEqual(\.age, 35)(jeff))
+		#expect(greater(\.age, 20)(jeff))
+		#expect(greaterOrEqual(\.age, 24)(jeff))
+		#expect(less(\.age, 30)(jeff))
+		#expect(lessOrEqual(\.age, 24)(jeff))
+		#expect(isTrue(\.isTall)(jeff))
+		#expect(!isFalse(\.isTall)(jeff))
+		#expect(!isNil(\.score)(jeff))
+		#expect(contains(\.name, "JEFF")(jeff))
+		#expect(optionalContains(\.nickname, "ref")(jeff))
+	}
+
+	@Test
+	func mixedCompositionAndShortCircuiting() {
+		var calls = 0
+		let ordinary: Filter.Predicate<Int> = { calls += 1; return $0 > 0 }
+		let yes: Filter.SendablePredicate<Int> = Filter.always()
+		let no: Filter.SendablePredicate<Int> = Filter.never()
+		#expect((ordinary && yes)(1))
+		#expect((yes && ordinary)(1))
+		#expect((ordinary || no)(1))
+		#expect((no || ordinary)(1))
+		#expect(!(!ordinary)(1))
+		#expect(calls == 5)
+		#expect((yes || ordinary)(1))
+		#expect(!(no && ordinary)(1))
+		#expect(calls == 5)
+		#expect(Filter.and(ordinary, yes)(1))
+		#expect(Filter.or(no, ordinary)(1))
+		#expect(!Filter.not(ordinary)(1))
+		#expect(calls == 8)
+	}
+
+	@Test
 	func greaterThan() {
 		let filtered = TestConstants.people.filter(Filter.greaterThan(\.age, 35))
 		#expect(Set(filtered.map(\.age)) == [40, 50])
