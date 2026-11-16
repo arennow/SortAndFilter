@@ -1,6 +1,8 @@
 public enum Sort {
 	public typealias Comparator<T> = (T, T) -> Bool
+	public typealias SendableComparator<T> = @Sendable (T, T) -> Bool
 
+	@_disfavoredOverload
 	public static func compose<R>(_ comparators: Comparator<R>...) -> Comparator<R> {
 		{ (lhs, rhs) in
 			for comp in comparators {
@@ -12,10 +14,27 @@ public enum Sort {
 		}
 	}
 
+	public static func compose<R>(_ comparators: SendableComparator<R>...) -> SendableComparator<R> {
+		{ (lhs, rhs) in
+			for comp in comparators {
+				if comp(lhs, rhs) { return true }
+				if comp(rhs, lhs) { return false }
+			}
+
+			return false
+		}
+	}
+
+	@_disfavoredOverload
 	public static func asc<V>(_ extractor: @escaping (V) -> some Comparable) -> Comparator<V> {
 		{ extractor($0) < extractor($1) }
 	}
 
+	public static func asc<V>(_ extractor: @escaping @Sendable (V) -> some Comparable & Sendable) -> SendableComparator<V> {
+		{ extractor($0) < extractor($1) }
+	}
+
+	@_disfavoredOverload
 	public static func asc<V>(_ extractor: @escaping (V) -> Optional<some Comparable>) -> Comparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
@@ -27,6 +46,18 @@ public enum Sort {
 		}
 	}
 
+	public static func asc<V>(_ extractor: @escaping @Sendable (V) -> Optional<some Comparable & Sendable>) -> SendableComparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (let .some(l), .some(let r)): return l < r
+				case (.none, .some): return false
+				case (.some, .none): return true
+				case (.none, .none): return false
+			}
+		}
+	}
+
+	@_disfavoredOverload
 	public static func asc<V>(_ extractor: @escaping (V) -> Bool) -> Comparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
@@ -36,6 +67,16 @@ public enum Sort {
 		}
 	}
 
+	public static func asc<V>(_ extractor: @escaping @Sendable (V) -> Bool) -> SendableComparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (false, true): return true
+				default: return false
+			}
+		}
+	}
+
+	@_disfavoredOverload
 	public static func asc<V>(_ extractor: @escaping (V) -> Bool?) -> Comparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
@@ -47,10 +88,27 @@ public enum Sort {
 		}
 	}
 
+	public static func asc<V>(_ extractor: @escaping @Sendable (V) -> Bool?) -> SendableComparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (.some(false), .some(true)): return true
+				case (.none, .some): return false
+				case (.some, .none): return true
+				default: return false
+			}
+		}
+	}
+
+	@_disfavoredOverload
 	public static func desc<V>(_ extractor: @escaping (V) -> some Comparable) -> Comparator<V> {
 		{ extractor($0) > extractor($1) }
 	}
 
+	public static func desc<V>(_ extractor: @escaping @Sendable (V) -> some Comparable & Sendable) -> SendableComparator<V> {
+		{ extractor($0) > extractor($1) }
+	}
+
+	@_disfavoredOverload
 	public static func desc<V>(_ extractor: @escaping (V) -> Optional<some Comparable>) -> Comparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
@@ -62,6 +120,18 @@ public enum Sort {
 		}
 	}
 
+	public static func desc<V>(_ extractor: @escaping @Sendable (V) -> Optional<some Comparable & Sendable>) -> SendableComparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (let .some(l), .some(let r)): return l > r
+				case (.none, .some): return false
+				case (.some, .none): return true
+				case (.none, .none): return false
+			}
+		}
+	}
+
+	@_disfavoredOverload
 	public static func desc<V>(_ extractor: @escaping (V) -> Bool) -> Comparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
@@ -71,7 +141,28 @@ public enum Sort {
 		}
 	}
 
+	public static func desc<V>(_ extractor: @escaping @Sendable (V) -> Bool) -> SendableComparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (true, false): return true
+				default: return false
+			}
+		}
+	}
+
+	@_disfavoredOverload
 	public static func desc<V>(_ extractor: @escaping (V) -> Bool?) -> Comparator<V> {
+		{
+			switch (extractor($0), extractor($1)) {
+				case (.some(true), .some(false)): return true
+				case (.none, .some): return false
+				case (.some, .none): return true
+				default: return false
+			}
+		}
+	}
+
+	public static func desc<V>(_ extractor: @escaping @Sendable (V) -> Bool?) -> SendableComparator<V> {
 		{
 			switch (extractor($0), extractor($1)) {
 				case (.some(true), .some(false)): return true
